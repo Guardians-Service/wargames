@@ -1,6 +1,6 @@
-# 🛡️ Guaridnas Wargames
+# 🛡️ Guardians-Service wargames
 
-**Guaridnas Wargames**는 Guardians 팀이 개발한 다양한 보안 워게임을 모아놓은 저장소입니다.  
+**Guardians-Service wargames**는 Guardians 팀이 개발한 다양한 보안 워게임을 모아놓은 저장소입니다.  
 각 워게임은 독립적인 디렉토리로 구성되어 있으며, 자동화된 CI/CD 파이프라인을 통해 효율적으로 배포됩니다.
 
 ## 📁 워게임 구조
