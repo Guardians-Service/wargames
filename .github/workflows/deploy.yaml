@@ -12,7 +12,7 @@ jobs:
       folders: ${{ steps.filter.outputs.folders }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Get changed top-level folders
         id: detect
@@ -29,29 +29,20 @@ jobs:
           fi
 
           CHANGED=$(echo "$RAW" | awk -F/ '{print $1}' | sort -u | xargs)
-
-          # 출력은 줄바꿈 없이
           echo "changed=$CHANGED" >> "$GITHUB_OUTPUT"
 
       - name: Get mentioned folders in commit description (comma-separated)
         id: commitmsg
         run: |
           DESCRIPTION=$(git log -1 --pretty=%B)
-
-          # 줄바꿈 이후 전체를 쉼표로 파싱
           LIST_LINE=$(echo "$DESCRIPTION" | tail -n +2 | tr -d '\n')
 
           echo "📩 Commit description list line:"
           echo "$LIST_LINE"
 
-          # 쉼표 기준으로 자르고 양쪽 공백 제거
           MENTIONED=$(echo "$LIST_LINE" | tr ',' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | sort -u | xargs)
-
           echo "📝 Mentioned folders: $MENTIONED"
-
-          # 줄바꿈 없이 안전하게 출력
           echo "mentioned=$MENTIONED" >> "$GITHUB_OUTPUT"
-
 
       - name: Intersect changed and mentioned folders
         id: filter
@@ -80,10 +71,6 @@ jobs:
             echo "folders=$JSON_ARRAY" | tee -a "$GITHUB_OUTPUT"
           fi
 
-      - name: Show final filtered folders (for debug)
-        run: |
-          echo "Folders: ${{ steps.filter.outputs.folders }}"
-
   deploy:
     needs: detect-changes
     runs-on: ubuntu-latest
@@ -91,32 +78,50 @@ jobs:
     strategy:
       matrix:
         folder: ${{ fromJson(needs.detect-changes.outputs.folders) }}
+
+    # GHCR push를 위해 packages: write 필수
+    permissions:
+      contents: read
+      packages: write
+      id-token: write  # (GCS OIDC 인증에 필요)
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
+      # -------------------------
+      # 1) GHCR 로그인 & Push
+      # -------------------------
+      - name: Login to GHCR
+        uses: docker/login-action@v3
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Login to Amazon Public ECR
+      - name: Build and push Docker image to GHCR
         run: |
-          aws ecr-public get-login-password --region us-east-1 \
-            | docker login --username AWS --password-stdin public.ecr.aws
-
-      - name: Build and push Docker image to ECR
-        run: |
-          IMAGE_NAME=public.ecr.aws/i7t0x0a1/gaurdians/wargames
-          IMAGE_TAG=${{ matrix.folder }}
+          IMAGE_NAME="ghcr.io/guardians-service/wargames"
+          IMAGE_TAG="${{ matrix.folder }}"
 
           echo "🚧 Building image $IMAGE_NAME:$IMAGE_TAG"
-          docker build -t $IMAGE_NAME:$IMAGE_TAG ./${{ matrix.folder }}
-          docker push $IMAGE_NAME:$IMAGE_TAG
+          docker build -t "$IMAGE_NAME:$IMAGE_TAG" "./${{ matrix.folder }}"
+          docker push "$IMAGE_NAME:$IMAGE_TAG"
 
-      - name: Upload ZIP archive to S3 (based on .upload-include)
+      # -------------------------
+      # 2) GCS 업로드 (S3 대체)
+      #    - 권장: OIDC(Workload Identity Federation)
+      # -------------------------
+      - name: Authenticate to Google Cloud (OIDC)
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}
+
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Upload ZIP archive to GCS (based on .upload-include)
         run: |
           FOLDER="${{ matrix.folder }}"
           ZIP_NAME="${FOLDER}.zip"
@@ -135,5 +140,6 @@ jobs:
 
           cd ..
 
-          echo "🚀 Uploading $ZIP_NAME to S3..."
-          aws s3 cp "$ZIP_NAME" "s3://s3-guardians-dev/wargame_zips/$ZIP_NAME"
+          echo "🚀 Uploading $ZIP_NAME to GCS..."
+          # GCS 경로는 상황에 맞게 조정
+          gcloud storage cp "$ZIP_NAME" "gs://guardians-dev/guardians-wargames/$ZIP_NAME"
