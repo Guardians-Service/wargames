@@ -27,3 +27,4 @@ curl -X POST -d "username=admin&password=<패스워드후보>" http://<서버 IP
 
 ※ 실패 시 "Unauthorized"라는 응답이 오며,
 ※ 성공 시 FLAG가 텍스트로 출력됩니다.
+
