@@ -2,11 +2,9 @@ name: Deploy CTF Problems
 
 on:
   push:
+    # 폴더/하위 파일 포함 전체 변경을 안정적으로 트리거
     paths:
-      - '*/*'
-    paths-ignore:                 # 불필요한 변경은 트리거에서 제외
-      - '.github/**'
-      - 'README.md'
+      - "**/*"
 
 jobs:
   detect-changes:
@@ -17,28 +15,38 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2          # HEAD~1 diff 안정화
+          # github.event.before 기반 diff를 안정적으로 보기 위해 전체 히스토리
+          fetch-depth: 0
 
-      - name: Get changed top-level folders (auto)
+      - name: Get changed files and detect top-level folders (auto, A applied)
         id: detect
         shell: bash
         run: |
           set -euo pipefail
-          echo "🔍 Detecting changed top-level folders..."
+          echo "🔍 Detecting changed files..."
 
-          # HEAD~1 이 없을 수 있는 케이스(첫 커밋 등) 대응
-          if git rev-parse HEAD~1 >/dev/null 2>&1; then
-            RAW=$(git diff --name-only HEAD~1 HEAD)
+          BEFORE="${{ github.event.before }}"
+          AFTER="${{ github.sha }}"
+
+          # 첫 푸시/특수 케이스에서 before가 비어있거나 000.. 일 수 있음
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            echo "⚠️ No valid 'before' commit. Using files from current commit only."
+            RAW=$(git show --pretty="" --name-only "$AFTER" || true)
           else
-            echo "⚠️ No previous commit. Using HEAD only."
-            RAW=$(git show --pretty="" --name-only HEAD)
+            RAW=$(git diff --name-only "$BEFORE" "$AFTER" || true)
           fi
 
           echo "Changed files:"
           echo "$RAW"
 
+          # .github/**, README.md 변경은 배포 대상에서 제외
+          FILTERED=$(echo "$RAW" | grep -vE '^\.github/|^README\.md$' || true)
+
+          echo "Filtered files:"
+          echo "$FILTERED"
+
           # 최상위 폴더만 추출 (폴더/파일 형태만)
-          CHANGED=$(echo "$RAW" | awk -F/ 'NF>1 {print $1}' | sort -u)
+          CHANGED=$(echo "$FILTERED" | awk -F/ 'NF>1 {print $1}' | sort -u)
 
           echo "✅ Changed top-level folders:"
           echo "$CHANGED"
@@ -62,7 +70,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-      id-token: write  # (GCS OIDC 인증에 필요)
+      id-token: write  # GCS OIDC 인증에 필요
 
     steps:
       - name: Checkout code
@@ -108,7 +116,7 @@ jobs:
       - name: Setup gcloud
         uses: google-github-actions/setup-gcloud@v2
 
-      # .upload-include 없으면 업로드만 스킵 (실패시키지 않음)
+      # .upload-include 없으면 업로드만 스킵
       - name: Upload ZIP archive to GCS (based on .upload-include)
         shell: bash
         run: |
@@ -131,8 +139,10 @@ jobs:
           echo "📦 Creating zip with files listed in .upload-include..."
           INCLUDE_FILES=$(cat .upload-include | xargs)
 
-          # zip 유틸이 없는 경우 대비(ubuntu-latest는 보통 있으나 안전장치)
-          command -v zip >/dev/null 2>&1 || sudo apt-get update && sudo apt-get install -y zip
+          if ! command -v zip >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y zip
+          fi
 
           zip -r "../$ZIP_NAME" $INCLUDE_FILES
 
