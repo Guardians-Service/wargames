@@ -14,3 +14,4 @@ flag는 자바스크립트의 전역 변수로 선언되어 있지만, 웹 페�
 http://localhost:8080/?q=<script>alert(flag)</script>
 
 ※ 위 URL을 브라우저 주소창에 그대로 입력하면 자바스크립트 팝업(alert)으로 플래그가 출력됩니다.
+
