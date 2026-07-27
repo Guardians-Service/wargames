@@ -1,10 +1,10 @@
 <!-- Parent: ../AGENTS.md -->
 <!-- Generated: 2026-07-23 | Updated: 2026-07-23 -->
 
-# Guaridnas-wargames (renaming to Guardians-wargames — in progress)
+# Guardians-wargames (GitHub remote rename pending)
 
 ## Purpose
-This is the **Guardians Wargames** repository (an independent git repo nested inside the larger `guardians-service` workspace). The folder/repo name `Guaridnas-wargames` was an unintentional typo of `Guardians-wargames`; a correction is approved and in progress but not yet complete — see "Working In This Directory" below for current status. It is a collection of ~15 self-contained, containerized CTF-style security training challenges ("wargames") built by the BeeGuardians team, plus a `kali` attacker/tooling container and a GitHub Actions CI/CD pipeline that builds each lab's Docker image, pushes it to Amazon Public ECR, and uploads a zipped copy of its distributable files to S3.
+This is the **Guardians Wargames** repository (an independent git repo nested inside the larger `guardians-service` workspace). The folder/repo name `Guaridnas-wargames` was an unintentional typo of `Guardians-wargames`; the local folder has been corrected, but the GitHub remote has not yet — see "Working In This Directory" below for current status. It is a collection of ~15 self-contained, containerized CTF-style security training challenges ("wargames") built by the BeeGuardians team, plus a `kali` attacker/tooling container and a GitHub Actions CI/CD pipeline that builds each lab's Docker image, pushes it to Amazon Public ECR, and uploads a zipped copy of its distributable files to S3.
 
 ## Key Files
 | File | Description |
@@ -36,7 +36,7 @@ This is the **Guardians Wargames** repository (an independent git repo nested in
 ## For AI Agents
 
 ### Working In This Directory
-**Repo rename in progress:** the correct name is `Guardians-wargames` (not `Guaridnas`). Status: local folder rename is blocked (open VS Code/GitHub Desktop handles denied the OS-level rename), and the GitHub remote (`github.com/BeeGuardians/Guaridnas-wargames`) hasn't been renamed yet (`gh` CLI not installed in the working environment). Until both complete, the on-disk path and git remote are still literally `Guaridnas-wargames` — don't assume the new name resolves yet. Once the rename lands, update this note and any hardcoded `Guaridnas-wargames` path references across the workspace (see `../AGENTS.md`).
+**Repo rename partially complete:** the correct name is `Guardians-wargames` (not `Guaridnas`). Status: the local folder has been renamed to `Guardians-wargames`, but the GitHub remote (`github.com/BeeGuardians/Guaridnas-wargames`) still has the old typo'd name and needs renaming (via `gh repo rename` or the GitHub web UI, then update this repo's `origin` remote URL). Once the GitHub-side rename lands, update this note (see `../AGENTS.md`).
 
 **This entire repository is a deliberately vulnerable security-training platform.** Every lab under this directory contains an intentional vulnerability (SQL injection, XSS, RCE, LFI, format-string bugs, weak crypto, insecure file upload, brute-forceable auth, etc.) that is the entire point of the challenge. **Never "fix," sanitize, patch, or harden these vulnerabilities** — doing so breaks the lab. Only make changes that are explicitly requested (e.g., adjusting difficulty, fixing an unrelated build/deploy bug, updating the flag, improving the CI pipeline). If a change is ambiguous about whether it would remove the intended vulnerability, ask before proceeding or leave the vulnerable code path untouched.
 

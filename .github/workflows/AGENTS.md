@@ -26,7 +26,7 @@ No local test harness — this is a `push`-triggered GitHub Actions workflow req
 ## Dependencies
 
 ### Internal
-- Every top-level lab directory in this repo (currently on disk as `Guaridnas-wargames/`, pending rename to `Guardians-wargames/` — see repo-root AGENTS.md) must have a `Dockerfile` and a `.upload-include` file for this workflow to succeed against it.
+- Every top-level lab directory in this repo (on disk as `Guardians-wargames/`; the GitHub remote is still named `Guaridnas-wargames` pending rename — see repo-root AGENTS.md) must have a `Dockerfile` and a `.upload-include` file for this workflow to succeed against it.
 
 ### External
 - Amazon Public ECR (`public.ecr.aws/i7t0x0a1/gaurdians/wargames`) and S3 bucket `s3-guardians-dev` (external AWS resources, not part of this repo).
