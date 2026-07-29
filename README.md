@@ -10,13 +10,18 @@
 - `BruteForceLAB-Easy`
 - `CRYPTOLAB-Caesar`
 - `CRYPTOLAB-XOR`
+- `DESERIALIZELAB-Medium`
 - `FileUpload-Webshell`
 - `FormatStringLAB-Easy`
+- `IDOR-Easy`
+- `JWTLAB-Medium`
 - `LFI-Easy`
+- `NOSQLI-Easy`
 - `RCELAB-Easy`
 - `RSA-High`
 - `SQLI-Easy`
 - `SQLI-Medium`
+- `SSRF-Medium`
 - `SSTILAB-Medium`
 - `STEGANO-Easy`
 - `XSSLAB-Cookie`
@@ -29,9 +34,9 @@
 
 이 저장소는 GitHub Actions를 통해 다음과 같은 자동화 프로세스를 수행합니다:
 
-1. **변경 감지 및 필터링**
-   - 커밋 메시지 본문에 디렉토리명을 쉼표로 나열하면 해당 디렉토리만 대상으로 자동화가 수행됩니다.
-   - 변경된 파일 중 커밋 메시지에 언급된 디렉토리와 일치하는 항목만 선별됩니다.
+1. **변경 감지 및 필터링** (2026-07-29부터 자동화됨 — 더 이상 커밋 메시지에 디렉토리명을 적을 필요 없음)
+   - `git diff`로 변경된 최상위 디렉토리를 자동으로 감지합니다.
+   - 그중 `Dockerfile`이 실제로 존재하는 디렉토리만 빌드 대상으로 필터링합니다 (`.github/` 같은 무관한 폴더가 실수로 걸려도 안전하게 건너뜀).
 
 2. **Docker 이미지 빌드 및 ECR 푸시**
    - 각 워게임 디렉토리의 `Dockerfile`을 이용해 Docker 이미지를 빌드합니다.
@@ -64,7 +69,6 @@ docker run -p 8000:8000 public.ecr.aws/i7t0x0a1/gaurdians/wargames/BruteForceLAB
 BeeGuardians 팀은 외부 기여를 환영합니다.  
 새로운 워게임을 추가하거나 기존 워게임을 개선하고 싶다면 다음 절차를 따라 주세요:
 
-1. 워게임 디렉토리를 생성하거나 수정합니다.
+1. 워게임 디렉토리를 생성하거나 수정합니다 (`Dockerfile`은 반드시 포함, 8000번 포트 사용).
 2. `.upload-include` 파일을 해당 디렉토리에 생성하여 압축 포함 대상 파일을 지정합니다.
-3. 커밋 메시지 본문(두 번째 줄 이후)에 쉼표로 구분된 디렉토리명을 명시합니다.
-4. GitHub에 푸시하면 자동으로 CI/CD 파이프라인이 실행됩니다.
+3. GitHub에 푸시하면 자동으로 CI/CD 파이프라인이 실행됩니다 (커밋 메시지에 디렉토리명을 별도로 적을 필요 없음).
