@@ -1,0 +1,15 @@
+📌 문제 제목
+Deserialization Lab - Load Settings
+
+🎯 문제 설명
+이 서비스는 "저장된 설정 불러오기" 기능을 제공합니다. base64로 인코딩된 설정 데이터를 전송하면
+서버는 이를 디코딩한 뒤 검증 없이 그대로 역직렬화(pickle.loads)합니다.
+악의적인 pickle 페이로드를 제작해 서버에서 원하는 명령을 실행하고 FLAG를 획득하세요.
+
+🧠 난이도
+중 (Medium)
+
+💡 힌트
+- Python의 pickle은 역직렬화 과정에서 임의의 함수(생성자)를 호출할 수 있습니다.
+- __reduce__ 메서드를 오버라이드한 클래스를 pickle로 직렬화해보세요.
+- POST /load 에 data=<base64 페이로드> 형태로 전송합니다 (form 또는 JSON body).

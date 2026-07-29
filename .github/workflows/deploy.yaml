@@ -33,50 +33,33 @@ jobs:
           # 출력은 줄바꿈 없이
           echo "changed=$CHANGED" >> "$GITHUB_OUTPUT"
 
-      - name: Get mentioned folders in commit description (comma-separated)
-        id: commitmsg
-        run: |
-          DESCRIPTION=$(git log -1 --pretty=%B)
-
-          # 줄바꿈 이후 전체를 쉼표로 파싱
-          LIST_LINE=$(echo "$DESCRIPTION" | tail -n +2 | tr -d '\n')
-
-          echo "📩 Commit description list line:"
-          echo "$LIST_LINE"
-
-          # 쉼표 기준으로 자르고 양쪽 공백 제거
-          MENTIONED=$(echo "$LIST_LINE" | tr ',' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | sort -u | xargs)
-
-          echo "📝 Mentioned folders: $MENTIONED"
-
-          # 줄바꿈 없이 안전하게 출력
-          echo "mentioned=$MENTIONED" >> "$GITHUB_OUTPUT"
-
-
-      - name: Intersect changed and mentioned folders
+      - name: Filter to folders that are actually buildable challenges
         id: filter
         run: |
+          # A folder only qualifies if it has its own Dockerfile — this is what
+          # lets us trust git-diff detection alone (no more manually listing
+          # folder names in the commit message). It also protects us from
+          # accidentally trying to "build" something like .github/ if a workflow
+          # file changes in the same push, since that has no Dockerfile.
           CHANGED="${{ steps.detect.outputs.changed }}"
-          MENTIONED="${{ steps.commitmsg.outputs.mentioned }}"
 
-          echo "📦 Changed folders: $CHANGED"
-          echo "📝 Mentioned folders: $MENTIONED"
+          echo "📦 Changed top-level folders: $CHANGED"
 
-          INTERSECT=""
+          BUILDABLE=""
           for folder in $CHANGED; do
-            if echo "$MENTIONED" | grep -qw "$folder"; then
-              INTERSECT="$INTERSECT $folder"
+            if [ -f "$folder/Dockerfile" ]; then
+              BUILDABLE="$BUILDABLE $folder"
             fi
           done
 
-          INTERSECT=$(echo "$INTERSECT" | xargs -n1 | sort -u)
-          echo "✅ Final filtered folders:"
-          echo "$INTERSECT"
+          BUILDABLE=$(echo "$BUILDABLE" | xargs -n1 | sort -u)
+          echo "✅ Final buildable folders:"
+          echo "$BUILDABLE"
 
-          if [ -z "$INTERSECT" ]; then
+          if [ -z "$BUILDABLE" ]; then
             echo 'folders=[]' | tee -a "$GITHUB_OUTPUT"
           else
-            JSON_ARRAY=$(echo "$INTERSECT" | jq -R -s -c 'split("\n") | map(select(length > 0))')
+            JSON_ARRAY=$(echo "$BUILDABLE" | jq -R -s -c 'split("\n") | map(select(length > 0))')
             echo "folders=$JSON_ARRAY" | tee -a "$GITHUB_OUTPUT"
           fi
 

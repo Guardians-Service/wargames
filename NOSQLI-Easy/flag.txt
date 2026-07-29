@@ -1,0 +1,1 @@
+FLAG{nosql_ne_byp4ss_mongo}

@@ -1,0 +1,16 @@
+📌 문제 제목
+NoSQL Injection Lab - Easy
+
+🎯 문제 설명
+이 서비스는 JSON body로 아이디/비밀번호를 전달받아 MongoDB 컬렉션에서 사용자를 조회하는 로그인 API를 제공합니다.
+서버는 전달받은 값을 검증 없이 그대로 쿼리 조건으로 사용합니다.
+
+일반적인 문자열 대신 MongoDB의 쿼리 연산자를 값으로 전달하면 어떤 일이 벌어질까요?
+admin 계정으로 로그인에 성공하면 flag를 획득할 수 있습니다.
+
+🧠 난이도
+하 (Easy)
+
+💡 힌트
+password 필드에 문자열이 아니라 JSON 객체를 넣어보세요. 예: {"$ne": null}
+curl -X POST http://localhost:8000/login -H "Content-Type: application/json" -d '{"username": "admin", "password": {"$ne": null}}'
