@@ -4,7 +4,7 @@
 # Guardians-wargames (GitHub remote rename pending)
 
 ## Purpose
-This is the **Guardians Wargames** repository (an independent git repo nested inside the larger `guardians-service` workspace). The folder/repo name `Guaridnas-wargames` was an unintentional typo of `Guardians-wargames`; the local folder has been corrected, but the GitHub remote has not yet — see "Working In This Directory" below for current status. It is a collection of ~15 self-contained, containerized CTF-style security training challenges ("wargames") built by the BeeGuardians team, plus a `kali` attacker/tooling container and a GitHub Actions CI/CD pipeline that builds each lab's Docker image, pushes it to Amazon Public ECR, and uploads a zipped copy of its distributable files to S3.
+This is the **Guardians Wargames** repository (an independent git repo nested inside the larger `guardians-service` workspace). The folder/repo name `Guaridnas-wargames` was an unintentional typo of `Guardians-wargames`; the local folder has been corrected, but the GitHub remote has not yet — see "Working In This Directory" below for current status. It is a collection of 25 self-contained, containerized CTF-style security training challenges ("wargames") built by the BeeGuardians team, plus a `kali` attacker/tooling container and a GitHub Actions CI/CD pipeline that builds each lab's Docker image, pushes it to Amazon Public ECR, and uploads a zipped copy of its distributable files to S3.
 
 ## Key Files
 | File | Description |
@@ -21,17 +21,22 @@ This is the **Guardians Wargames** repository (an independent git repo nested in
 | [CRYPTOLAB-XOR/AGENTS.md](CRYPTOLAB-XOR/AGENTS.md) | Base64 + single-byte XOR cipher decryption challenge |
 | [FileUpload-Webshell/AGENTS.md](FileUpload-Webshell/AGENTS.md) | PHP file upload with no extension/content validation → webshell RCE |
 | [FormatStringLAB-Easy/AGENTS.md](FormatStringLAB-Easy/AGENTS.md) | C program with `printf(buf)` format-string vulnerability, served over a raw TCP socket via `socat` |
+| [FORENSICS-High/AGENTS.md](FORENSICS-High/AGENTS.md) | Static evidence file with the flag encoded through 4 layers (hex → XOR → base64 → gzip) — pure decode-chain forensics puzzle, no live exploit |
 | [kali/AGENTS.md](kali/AGENTS.md) | Kali Linux attacker/tooling container (nmap, hydra, sqlmap, gdb, etc.) exposed via `ttyd` web terminal |
+| [JWTLAB-High/AGENTS.md](JWTLAB-High/AGENTS.md) | JWT `kid` header path traversal → server reads an attacker-known file (the app's own source) as the HMAC verification key, enabling forged admin tokens |
 | [LFI-Easy/AGENTS.md](LFI-Easy/AGENTS.md) | Flask app with unsanitized `?page=` parameter → local file inclusion / path traversal |
 | [RCELAB-Easy/AGENTS.md](RCELAB-Easy/AGENTS.md) | Flask app that shells out to `ping` with unsanitized input → OS command injection |
 | [RSA-High/AGENTS.md](RSA-High/AGENTS.md) | Weak RSA parameters (small `e=3`, no padding) vulnerable to a cube-root / low-exponent attack |
 | [SQLI-Easy/AGENTS.md](SQLI-Easy/AGENTS.md) | Login form with string-concatenated SQL query → classic SQL injection auth bypass |
 | [SQLI-Medium/AGENTS.md](SQLI-Medium/AGENTS.md) | `?id=` numeric parameter concatenated into SQL query → UNION-based SQL injection, sqlmap-friendly |
+| [SQLI-Blind-High/AGENTS.md](SQLI-Blind-High/AGENTS.md) | `?id=` endpoint returns only a boolean (no data/error leakage) → boolean-based blind SQL injection to extract the flag character by character |
 | [SSTILAB-Medium/AGENTS.md](SSTILAB-Medium/AGENTS.md) | Flask `render_template_string` with unsanitized user input → server-side template injection (Jinja2 RCE) |
 | [STEGANO-Easy/AGENTS.md](STEGANO-Easy/AGENTS.md) | PNG image with a flag hidden in trailing bytes → steganography / file-forensics challenge |
 | [XSSLAB-Cookie/AGENTS.md](XSSLAB-Cookie/AGENTS.md) | Reflected XSS used to steal a `FLAG` cookie via `document.cookie` |
 | [XSSLAB-Easy/AGENTS.md](XSSLAB-Easy/AGENTS.md) | Reflected XSS that pops a JS global `flag` variable via `alert()` |
 | [XSSLAB-Medium/AGENTS.md](XSSLAB-Medium/AGENTS.md) | Reflected XSS used to `fetch()` a same-origin `/flag` JSON API and exfiltrate the result |
+| [XSSLAB-High/AGENTS.md](XSSLAB-High/AGENTS.md) | Reflected XSS with an active-but-incomplete filter (blocks `<script>` and quoted event handlers only) → filter bypass via unquoted `onerror=`/`onload=` |
+| [ZIPSLIP-High/AGENTS.md](ZIPSLIP-High/AGENTS.md) | Zip-upload feature extracts entries via naive `os.path.join`, bypassing `zipfile`'s own safe extraction → Zip Slip write outside the intended directory |
 
 ## For AI Agents
 

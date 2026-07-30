@@ -1,0 +1,28 @@
+📌 문제 제목
+XSS Lab - High (Filter Bypass)
+
+🎯 문제 설명
+이 방명록 페이지는 사용자의 댓글을 HTML에 그대로 삽입하지만, `<script>` 태그와 따옴표로
+감싼 이벤트 핸들러(`onerror="..."`, `onload='...'` 등)는 서버에서 필터링합니다.
+
+하지만 이 필터는 완벽하지 않습니다. 필터를 우회해 Reflected XSS를 성공시키고,
+`document.cookie`에 담긴 `FLAG` 쿠키 값을 `alert()`로 출력하세요.
+
+🧠 난이도
+상 (High)
+
+💡 힌트
+- `<script>`와 따옴표로 감싼 `on이벤트="..."`는 막혀 있습니다.
+- 따옴표 없이 이벤트 핸들러를 쓰면 어떻게 될까요?
+
+💡 예시 풀이
+```
+http://localhost:8000/?comment=<img src=x onerror=alert(document.cookie)>
+```
+또는
+```
+http://localhost:8000/?comment=<svg onload=alert(document.cookie)>
+```
+
+위 URL을 브라우저 주소창에 그대로 입력하면(또는 URL 인코딩 후) FLAG 쿠키 값이 alert 창으로
+출력됩니다.

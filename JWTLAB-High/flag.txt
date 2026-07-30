@@ -1,0 +1,1 @@
+FLAG{kid_path_traversal_key_confusion}

@@ -13,20 +13,25 @@
 - `DESERIALIZELAB-Medium`
 - `FileUpload-Webshell`
 - `FormatStringLAB-Easy`
+- `FORENSICS-High`
 - `IDOR-Easy`
 - `JWTLAB-Medium`
+- `JWTLAB-High`
 - `LFI-Easy`
 - `NOSQLI-Easy`
 - `RCELAB-Easy`
 - `RSA-High`
 - `SQLI-Easy`
 - `SQLI-Medium`
+- `SQLI-Blind-High`
 - `SSRF-Medium`
 - `SSTILAB-Medium`
 - `STEGANO-Easy`
 - `XSSLAB-Cookie`
 - `XSSLAB-Easy`
 - `XSSLAB-Medium`
+- `XSSLAB-High`
+- `ZIPSLIP-High`
 
 각 디렉토리는 해당 워게임의 `Dockerfile`, `.upload-include` 파일, 소스 코드 등을 포함합니다.
 

